@@ -1,6 +1,6 @@
 <#
 auth: Carver, Christopher
-desc: This script powers on (starts) the Azure VM
+desc: This script retrieves the state of the Azure server
 note: To be used by Orchestrator.
 #>
 
@@ -8,7 +8,6 @@ note: To be used by Orchestrator.
    Dev Note: Replace INSERT VARIABLE and INSERT PUBLISHED DATA in the lines
    below from Orchestrator.
 -----------------------------------------------------------------------------#>
-
 $azureSubscriptionName = "FILL ME IN"
 $azureCloudService = "FILL ME IN"
 $azureVM = "FILL ME IN"
@@ -19,6 +18,7 @@ $azurePublishSettingsPath = "FILL ME IN"
    Orchestrator can extract all globally scoped variables, this helps with
    informing what is being published back to Orchestrator.
 -----------------------------------------------------------------------------#>
+$azureVMPowerState = "Unknown"
 
 # set return code, information, and trace to defaults
 # valid return codes:
@@ -26,14 +26,18 @@ $azurePublishSettingsPath = "FILL ME IN"
 #  1 -- Success with info
 #  2 -- Error
 #  3 -- Fatal Error
+# valid return states:
+#  SUCCESS -- The execution and operation was successful
+#  FAILURE -- The execution or operation failed
 $retCode = 0
+$retState = "SUCCESS"
 $retInfo = ""
 $retTrace= ""
 
 <# MAIN
 -----------------------------------------------------------------------------#>
 
-$retTrace += "`r`n$(Get-Date -format 'u')`t Entering Start Azure VM."
+$retTrace += "`r`n$(Get-Date -format 'u')`t Entering Get Azure VM Power State."
 $retTrace += "`r`n$(Get-Date -format 'u')`t   Parameters:"
 $retTrace += "`r`n$(Get-Date -format 'u')`t     Subscription Name: $azureSubscriptionName"
 $retTrace += "`r`n$(Get-Date -format 'u')`t     Azure Cloud Service: $azureCloudService"
@@ -48,25 +52,22 @@ try
   Import-Module Azure 
 
   $retTrace += "`r`n$(Get-Date -format 'u')`t Importing Azure settings."
-  Import-AzurePublishSettingsFile –PublishSettingsFile $azurePublishSettingsPath | out-null
+  Import-AzurePublishSettingsFile –PublishSettingsFile $azurePublishSettingsPath 
 
   $retTrace += "`r`n$(Get-Date -format 'u')`t Setting Azure subscription."
   Select-AzureSubscription -SubscriptionName $azureSubscriptionName
 
-  $retTrace += "`r`n$(Get-Date -format 'u')`t Starting the Azure server."
-  $retCatch = Start-AzureVM -ServiceName $azureCloudService -Name $azureVM
-  
-  $retTrace += "`r`n$(Get-Date -format 'u')`t Sleeping 10 seconds."
-  sleep 10
-
   $retTrace += "`r`n$(Get-Date -format 'u')`t Retrieving Azure server power state."
   $azureVMPowerState = (Get-AzureVM -ServiceName $azureCloudService -Name $azureVM).PowerState
+
+  $retTrace += "`r`n$(Get-Date -format 'u')`t Azure server power state: $azureVMPowerState"  
+  $retInfo += "`r`n$(Get-Date -format 'u')`t Azure server power state: $azureVMPowerState"
 }
-catch 
-{
+catch {
   # preserve the error
   $retCode = 2
-  $retInfo = "Failure occurred while starting Azure server." 
+  $retState = "FAILURE"
+  $retInfo = "Failure occurred while retrieving Azure power state." 
   $retTrace += "`r`n$(Get-Date -format 'u')`t Exception: " + $_.Exception
 }
 finally
@@ -75,4 +76,4 @@ finally
   $ErrorActionPreference = "Continue"
 }
 
-$retTrace += "`r`n$(Get-Date -format 'u')`t Exiting Start Azure VM."
+$retTrace += "`r`n$(Get-Date -format 'u')`t Exiting Get Azure VM Power State."

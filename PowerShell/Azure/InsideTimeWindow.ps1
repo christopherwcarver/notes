@@ -10,11 +10,11 @@ note: To be used by Orchestrator.
 -----------------------------------------------------------------------------#>
 
 # start of window time
-$startTime = "\`d.T.~Ed/{CF6C6161-C9B7-424C-A5AA-48AF9D06A409}.Power On Time (UTC)\`d.T.~Ed/"
+$startTime = "FILL ME IN"
 # stop of window time
-$stopTime = "\`d.T.~Ed/{CF6C6161-C9B7-424C-A5AA-48AF9D06A409}.Power Off Time (UTC)\`d.T.~Ed/"
+$stopTime = "FILL ME IN"
 # days for the window to be open
-$activeDays = "\`d.T.~Ed/{CF6C6161-C9B7-424C-A5AA-48AF9D06A409}.Power On Days\`d.T.~Ed/"
+$activeDays = "FILL ME IN"
 
 # set return code, information, and trace to defaults
 # valid return codes:
